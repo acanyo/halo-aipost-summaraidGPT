@@ -1,6 +1,11 @@
 // ArticleSummary.js
 class ArticleSummary {
     constructor(container, options = {}) {
+        // 检查是否启用摘要功能
+        if (!articleConfig.enableSummary) {
+            return;
+        }
+
         // 检查当前URL是否在黑名单中
         if (this.shouldHideSummary()) {
             return;
