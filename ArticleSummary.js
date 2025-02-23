@@ -25,6 +25,14 @@ class ArticleSummary {
             theme: options.theme || 'default'
         };
         this.render();
+        this.logMessage(); // 添加控制台日志输出
+    }
+
+    // 控制台日志输出
+    logMessage() {
+        console.log(`\n %c 智阅GPT-智能AI摘要 %c https://www.lik.cc/ \n`, 
+            'color: #fadfa3; background: #030307; padding:5px 0;', 
+            'background: #fadfa3; padding:5px 0;');
     }
 
     // 检查是否在黑名单中
