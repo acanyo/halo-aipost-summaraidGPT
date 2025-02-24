@@ -105,21 +105,39 @@ class ArticleSummary {
         const cursorElement = document.createElement('span');
         cursorElement.innerHTML = '|';
         cursorElement.style.animation = 'blink 0.7s step-end infinite';
-        typingTextElement.appendChild(cursorElement);
+
+        // 添加光标淡出动画样式
+        const fadeOutStyle = document.createElement('style');
+        fadeOutStyle.innerHTML = `
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; }
+            }
+            .cursor-fadeout {
+                animation: fadeOut 0.5s forwards;
+            }
+        `;
+        document.head.appendChild(fadeOutStyle);
 
         const type = () => {
-            if (index <= text.length) {  // 修改为 <= 确保最后一个字符能显示
-                typingTextElement.innerHTML = text.slice(0, index) + cursorElement.outerHTML;
-                index++;
-                const randomDelay = typingSpeed + Math.random() * 50;
-                if (index <= text.length) {  // 只有还有字符要打时才继续
-                    setTimeout(type, randomDelay);
-                } else {
-                    // 等待一小段时间后移除光标，确保最后一个字符可见
+            if (index <= text.length) {
+                const currentText = text.slice(0, index);
+                typingTextElement.innerHTML = currentText;
+                typingTextElement.appendChild(cursorElement);
+
+                if (index === text.length) {
+                    // 添加淡出动画后移除光标
                     setTimeout(() => {
-                        cursorElement.remove();
-                        typingTextElement.innerHTML = text;  // 确保显示完整文本
+                        cursorElement.classList.add('cursor-fadeout');
+                        setTimeout(() => {
+                            cursorElement.remove();
+                            fadeOutStyle.remove();  // 清理动画样式
+                        }, 500);
                     }, 500);
+                } else {
+                    index++;
+                    const randomDelay = typingSpeed + Math.random() * 50;
+                    setTimeout(type, randomDelay);
                 }
             }
         };
