@@ -30,8 +30,8 @@ class ArticleSummary {
 
     // 控制台日志输出
     logMessage() {
-        console.log(`\n %c 智阅GPT-智能AI摘要 %c https://www.lik.cc/ \n`, 
-            'color: #fadfa3; background: #030307; padding:5px 0;', 
+        console.log(`\n %c 智阅GPT-智能AI摘要 %c https://www.lik.cc/ \n`,
+            'color: #fadfa3; background: #030307; padding:5px 0;',
             'background: #fadfa3; padding:5px 0;');
     }
 
@@ -53,15 +53,15 @@ class ArticleSummary {
             if (pattern.endsWith('*')) {
                 pattern = pattern.slice(0, -1); // 移除结尾的 *
             }
-            
+
             // 将剩余的 * 转换为正则表达式的 .*
             pattern = pattern.replace(/\*/g, '.*');
-            
+
             // 如果模式不以 / 开头，添加 /
             if (!pattern.startsWith('/')) {
                 pattern = '/' + pattern;
             }
-            
+
             // 创建正则表达式
             const regex = new RegExp(pattern);
             return regex.test(currentPath);
@@ -75,7 +75,7 @@ class ArticleSummary {
 
     render() {
         if (!this.container) return;  // 如果不需要显示，直接返回
-        
+
         const summaryHtml = `
             <div class="post-SummaraidGPT gpttheme_${this.options.theme}">
                 <div class="SummaraidGPT-title">
@@ -90,7 +90,7 @@ class ArticleSummary {
                 </div>
             </div>
         `;
-        
+
         // 使用 innerHTML 插入摘要
         this.container.innerHTML = summaryHtml + this.container.innerHTML;
         this.typeText(this.options.content);
@@ -101,22 +101,26 @@ class ArticleSummary {
         const typingTextElement = document.getElementById('typing-text');
         typingTextElement.innerHTML = '';
         let index = 0;
-        const typingSpeed = 50; // 每个字符的基础打字速度
+        const typingSpeed = 50;
         const cursorElement = document.createElement('span');
-        cursorElement.innerHTML = '|'; // 光标
-        cursorElement.style.animation = 'blink 0.7s step-end infinite'; // 添加闪烁动画
+        cursorElement.innerHTML = '|';
+        cursorElement.style.animation = 'blink 0.7s step-end infinite';
         typingTextElement.appendChild(cursorElement);
 
         const type = () => {
-            if (index < text.length) {
-                // 更新文本时保留光标
+            if (index <= text.length) {  // 修改为 <= 确保最后一个字符能显示
                 typingTextElement.innerHTML = text.slice(0, index) + cursorElement.outerHTML;
                 index++;
-                const randomDelay = typingSpeed + Math.random() * 50; // 随机延迟
-                setTimeout(type, randomDelay);
-            } else {
-                // 移除光标
-                cursorElement.remove();
+                const randomDelay = typingSpeed + Math.random() * 50;
+                if (index <= text.length) {  // 只有还有字符要打时才继续
+                    setTimeout(type, randomDelay);
+                } else {
+                    // 等待一小段时间后移除光标，确保最后一个字符可见
+                    setTimeout(() => {
+                        cursorElement.remove();
+                        typingTextElement.innerHTML = text;  // 确保显示完整文本
+                    }, 500);
+                }
             }
         };
         type();
