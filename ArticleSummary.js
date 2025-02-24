@@ -24,6 +24,10 @@ class ArticleSummary {
             source: options.source || 'SummaraidGPT',
             theme: options.theme || 'default'
         };
+        this.options.theme = this.detectDarkMode() ? 'dark' : (options.theme || 'default');
+        if (articleConfig.darkModeSelector) {
+            this.observeDarkMode();
+        }
         this.render();
         this.logMessage(); // 添加控制台日志输出
     }
@@ -95,7 +99,69 @@ class ArticleSummary {
         this.container.innerHTML = summaryHtml + this.container.innerHTML;
         this.typeText(this.options.content);
     }
+// 检测暗色主题
+    detectDarkMode() {
+        if (!articleConfig.darkModeSelector) {
+            return false;
+        }
 
+        try {
+            const selector = articleConfig.darkModeSelector.trim();
+            if (!selector) return false;
+
+            if (selector.includes('=')) {
+                const [attr, value] = selector.split('=').map(s => s.trim());
+                const cleanValue = value.replace(/['"]/g, '');
+                return document.documentElement.getAttribute(attr) === cleanValue;
+            } else {
+                return document.documentElement.hasAttribute(selector);
+            }
+        } catch (error) {
+            console.error('Dark mode detection error:', error);
+            return false;
+        }
+    }
+
+// 监听主题变化
+    observeDarkMode() {
+        try {
+            const selector = articleConfig.darkModeSelector.trim();
+            if (!selector) return;
+
+            const attributeName = selector.includes('=')
+                    ? selector.split('=')[0].trim()
+                    : selector;
+
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' &&
+                            mutation.attributeName === attributeName) {
+                        const isDark = this.detectDarkMode();
+                        this.updateTheme(isDark ? 'dark' : 'default');
+                    }
+                });
+            });
+
+            observer.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: [attributeName]
+            });
+        } catch (error) {
+            console.error('Dark mode observer error:', error);
+        }
+    }
+
+// 更新主题
+    updateTheme(theme) {
+        if (this.options.theme !== theme) {
+            this.options.theme = theme;
+            const container = document.querySelector('.post-SummaraidGPT');
+            if (container) {
+                container.style.transition = 'background-color 0.3s, color 0.3s';
+                container.className = `post-SummaraidGPT gpttheme_${theme}`;
+            }
+        }
+    }
     // 打字机效果函数
     typeText(text) {
         const typingTextElement = document.getElementById('typing-text');
